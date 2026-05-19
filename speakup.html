@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SpeakUp 🎙️ – Suara Siswa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fraunces:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f0f4ff;
+    --surface: #ffffff;
+    --surface2: #eef2ff;
+    --primary: #6366f1;
+    --primary-soft: #e0e7ff;
+    --accent: #06b6d4;
+    --accent-soft: #cffafe;
+    --pink: #f472b6;
+    --pink-soft: #fce7f3;
+    --text: #1e1b4b;
+    --text-muted: #6b7280;
+    --border: #e0e7ff;
+    --shadow: 0 4px 24px rgba(99,102,241,0.08);
+    --radius: 20px;
+    --radius-sm: 12px;
+    --green: #34d399;
+    --green-soft: #d1fae5;
+    --orange: #fb923c;
+    --orange-soft: #ffedd5;
+  }
+  [data-theme="dark"] {
+    --bg: #0f0e17;
+    --surface: #1a1828;
+    --surface2: #221f35;
+    --primary: #818cf8;
+    --primary-soft: #1e1b4b;
+    --accent: #22d3ee;
+    --accent-soft: #164e63;
+    --pink: #f9a8d4;
+    --pink-soft: #4a1942;
+    --text: #e0e7ff;
+    --text-muted: #94a3b8;
+    --border: #2d2a4a;
+    --shadow: 0 4px 24px rgba(0,0,0,0.3);
+    --green: #6ee7b7;
+    --green-soft: #064e3b;
+    --orange: #fdba74;
+    --orange-soft: #431407;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background 0.3s, color 0.3s;
+    overflow-x: hidden;
+  }
+
+  /* ── FLOATING NAV ── */
+  nav {
+    position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 999px;
+    padding: 10px 20px;
+    display: flex; align-items: center; gap: 16px;
+    z-index: 1000;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(12px);
+  }
+  .nav-logo { font-weight: 800; font-size: 1.1rem; color: var(--primary); letter-spacing: -0.5px; }
+  .nav-logo span { color: var(--pink); }
+  .nav-links { display: flex; gap: 8px; }
+  .nav-links a {
+    font-size: 0.8rem; font-weight: 600; color: var(--text-muted);
+    text-decoration: none; padding: 5px 12px; border-radius: 999px;
+    transition: all 0.2s; cursor: pointer;
+  }
+  .nav-links a:hover, .nav-links a.active { background: var(--primary-soft); color: var(--primary); }
+  .dark-toggle {
+    background: var(--surface2); border: none; border-radius: 999px;
+    padding: 6px 10px; cursor: pointer; font-size: 1rem;
+    transition: all 0.2s;
+  }
+  .dark-toggle:hover { transform: rotate(20deg); }
+
+  /* ── PAGES ── */
+  .page { display: none; min-height: 100vh; }
+  .page.active { display: block; }
+
+  /* ── LANDING ── */
+  #page-landing {
+    display: none;
+    flex-direction: column; align-items: center; justify-content: center;
+    min-height: 100vh; padding: 80px 20px 40px;
+    position: relative; overflow: hidden;
+  }
+  #page-landing.active { display: flex; }
+
+  .blob {
+    position: absolute; border-radius: 50%; filter: blur(70px); opacity: 0.35; pointer-events: none;
+    animation: float 6s ease-in-out infinite;
+  }
+  .blob-1 { width: 400px; height: 400px; background: var(--primary); top: -100px; right: -100px; animation-delay: 0s; }
+  .blob-2 { width: 300px; height: 300px; background: var(--accent); bottom: 0; left: -80px; animation-delay: 2s; }
+  .blob-3 { width: 200px; height: 200px; background: var(--pink); top: 40%; left: 30%; animation-delay: 4s; }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-20px)} }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--primary-soft); color: var(--primary);
+    font-size: 0.75rem; font-weight: 700; padding: 6px 14px;
+    border-radius: 999px; margin-bottom: 24px;
+    border: 1.5px solid var(--border);
+    animation: popIn 0.5s ease;
+  }
+  @keyframes popIn { from{opacity:0;transform:scale(0.8)} to{opacity:1;transform:scale(1)} }
+
+  .hero-title {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(2.5rem, 7vw, 4.5rem);
+    font-weight: 700; text-align: center;
+    line-height: 1.1; margin-bottom: 16px;
+    animation: slideUp 0.6s ease 0.1s both;
+  }
+  .hero-title .highlight {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  @keyframes slideUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+
+  .hero-sub {
+    font-size: 1.1rem; color: var(--text-muted); text-align: center;
+    max-width: 480px; line-height: 1.6; margin-bottom: 12px;
+    animation: slideUp 0.6s ease 0.2s both;
+  }
+  .anon-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--green-soft); color: var(--green);
+    font-size: 0.8rem; font-weight: 700; padding: 6px 14px;
+    border-radius: 999px; margin-bottom: 32px;
+    animation: slideUp 0.6s ease 0.25s both;
+  }
+
+  .class-select-wrap {
+    display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+    margin-bottom: 28px; animation: slideUp 0.6s ease 0.3s both;
+  }
+  .class-chip {
+    padding: 8px 16px; border-radius: 999px;
+    border: 2px solid var(--border);
+    background: var(--surface); color: var(--text-muted);
+    font-size: 0.85rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .class-chip:hover { border-color: var(--primary); color: var(--primary); }
+  .class-chip.selected { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+  .btn-start {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: #fff; border: none; border-radius: 999px;
+    padding: 18px 44px; font-size: 1.1rem; font-weight: 700;
+    cursor: pointer; box-shadow: 0 8px 32px rgba(99,102,241,0.3);
+    transition: all 0.25s; animation: slideUp 0.6s ease 0.35s both;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .btn-start:hover { transform: translateY(-3px); box-shadow: 0 16px 40px rgba(99,102,241,0.4); }
+  .btn-start:active { transform: translateY(0); }
+
+  .landing-cards {
+    display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;
+    margin-top: 48px; animation: slideUp 0.6s ease 0.5s both;
+  }
+  .l-card {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: var(--radius); padding: 20px 24px;
+    min-width: 160px; text-align: center;
+    box-shadow: var(--shadow); transition: transform 0.2s;
+  }
+  .l-card:hover { transform: translateY(-4px); }
+  .l-card-icon { font-size: 2rem; margin-bottom: 8px; }
+  .l-card-num { font-size: 1.5rem; font-weight: 800; color: var(--primary); }
+  .l-card-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
+
+  /* ── QUIZ ── */
+  #page-quiz { display: none; align-items: center; justify-content: center; padding: 100px 20px 40px; }
+  #page-quiz.active { display: flex; }
+
+  .quiz-container { width: 100%; max-width: 620px; }
+
+  .progress-wrap { margin-bottom: 32px; }
+  .progress-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .progress-label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); }
+  .progress-pct { font-size: 0.8rem; font-weight: 700; color: var(--primary); }
+  .progress-bar { height: 8px; background: var(--primary-soft); border-radius: 999px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); border-radius: 999px; transition: width 0.5s cubic-bezier(.4,0,.2,1); }
+
+  .q-card {
+    background: var(--surface); border-radius: var(--radius);
+    padding: 36px; box-shadow: var(--shadow);
+    border: 1.5px solid var(--border);
+    animation: cardIn 0.4s cubic-bezier(.4,0,.2,1);
+  }
+  @keyframes cardIn { from{opacity:0;transform:translateY(20px) scale(0.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+  .q-category {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 0.72rem; font-weight: 700; padding: 4px 12px;
+    border-radius: 999px; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .q-text { font-size: 1.4rem; font-weight: 700; line-height: 1.4; margin-bottom: 28px; }
+
+  /* Emoji Reaction */
+  .emoji-grid { display: flex; gap: 12px; flex-wrap: wrap; }
+  .emoji-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    padding: 14px 18px; border-radius: var(--radius-sm);
+    border: 2px solid var(--border); background: var(--surface2);
+    cursor: pointer; transition: all 0.2s; flex: 1; min-width: 70px;
+    font-size: 0.75rem; font-weight: 600; color: var(--text-muted);
+  }
+  .emoji-btn .em { font-size: 2rem; transition: transform 0.2s; }
+  .emoji-btn:hover .em { transform: scale(1.2); }
+  .emoji-btn:hover { border-color: var(--primary); background: var(--primary-soft); color: var(--primary); }
+  .emoji-btn.selected { border-color: var(--primary); background: var(--primary-soft); color: var(--primary); transform: scale(1.03); }
+
+  /* Slider */
+  .slider-wrap { padding: 8px 0; }
+  .slider-labels { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 0.8rem; color: var(--text-muted); }
+  input[type=range] {
+    -webkit-appearance: none; width: 100%; height: 8px;
+    border-radius: 999px; background: var(--primary-soft); outline: none;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 28px; height: 28px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    cursor: pointer; box-shadow: 0 4px 12px rgba(99,102,241,0.4);
+    transition: transform 0.2s;
+  }
+  input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+  .slider-value {
+    text-align: center; font-size: 2rem; font-weight: 800;
+    color: var(--primary); margin-top: 16px;
+  }
+
+  /* Multiple Choice */
+  .mc-grid { display: flex; flex-direction: column; gap: 10px; }
+  .mc-btn {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 18px; border-radius: var(--radius-sm);
+    border: 2px solid var(--border); background: var(--surface2);
+    cursor: pointer; transition: all 0.2s; font-size: 0.95rem; font-weight: 500;
+    color: var(--text);
+  }
+  .mc-btn .mc-icon { font-size: 1.2rem; }
+  .mc-btn:hover { border-color: var(--primary); background: var(--primary-soft); color: var(--primary); }
+  .mc-btn.selected { border-color: var(--primary); background: var(--primary-soft); color: var(--primary); }
+  .mc-check { margin-left: auto; width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; transition: all 0.2s; }
+  .mc-btn.selected .mc-check { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+  /* Text */
+  .q-textarea {
+    width: 100%; border-radius: var(--radius-sm);
+    border: 2px solid var(--border); background: var(--surface2);
+    color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.95rem; padding: 16px; resize: none; outline: none;
+    transition: border 0.2s; line-height: 1.6;
+  }
+  .q-textarea:focus { border-color: var(--primary); }
+  .q-textarea::placeholder { color: var(--text-muted); }
+
+  /* Nav buttons */
+  .q-nav { display: flex; gap: 12px; margin-top: 24px; align-items: center; }
+  .btn-back {
+    padding: 12px 20px; border-radius: 999px;
+    border: 2px solid var(--border); background: transparent;
+    color: var(--text-muted); font-weight: 600; cursor: pointer;
+    transition: all 0.2s; font-size: 0.9rem;
+  }
+  .btn-back:hover { border-color: var(--primary); color: var(--primary); }
+  .btn-next {
+    flex: 1; padding: 14px; border-radius: 999px;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: #fff; border: none; font-weight: 700; font-size: 1rem;
+    cursor: pointer; transition: all 0.25s;
+    box-shadow: 0 6px 20px rgba(99,102,241,0.25);
+  }
+  .btn-next:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(99,102,241,0.35); }
+  .btn-skip {
+    font-size: 0.8rem; color: var(--text-muted); background: none; border: none;
+    cursor: pointer; padding: 8px; text-decoration: underline; white-space: nowrap;
+  }
+  .btn-skip:hover { color: var(--primary); }
+
+  /* ── DONE ── */
+  #page-done { display: none; align-items: center; justify-content: center; padding: 100px 20px; text-align: center; }
+  #page-done.active { display: flex; }
+  .done-wrap { max-width: 480px; }
+  .done-emoji { font-size: 5rem; animation: bounce 1s ease infinite; margin-bottom: 16px; display: block; }
+  @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+  .done-title { font-family: 'Fraunces', serif; font-size: 2.5rem; font-weight: 700; margin-bottom: 12px; }
+  .done-quote {
+    background: var(--surface); border-radius: var(--radius);
+    padding: 20px 24px; margin: 20px 0 28px;
+    border-left: 4px solid var(--primary);
+    font-style: italic; color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;
+    box-shadow: var(--shadow);
+  }
+  .btn-home {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--primary); color: #fff; border: none; border-radius: 999px;
+    padding: 14px 32px; font-weight: 700; font-size: 1rem; cursor: pointer;
+    transition: all 0.2s; text-decoration: none;
+  }
+  .btn-home:hover { background: var(--accent); transform: translateY(-2px); }
+
+  /* ── HASIL ── */
+  #page-hasil { display: none; padding: 100px 20px 40px; }
+  #page-hasil.active { display: block; }
+  .hasil-wrap { max-width: 800px; margin: 0 auto; }
+  .page-title { font-family: 'Fraunces', serif; font-size: 2.2rem; font-weight: 700; margin-bottom: 6px; }
+  .page-sub { color: var(--text-muted); margin-bottom: 32px; }
+
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 32px; }
+  .stat-card {
+    background: var(--surface); border-radius: var(--radius); padding: 20px 24px;
+    border: 1.5px solid var(--border); box-shadow: var(--shadow);
+  }
+  .stat-icon { font-size: 1.5rem; margin-bottom: 8px; }
+  .stat-num { font-size: 2.2rem; font-weight: 800; color: var(--primary); }
+  .stat-label { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
+
+  .chart-card {
+    background: var(--surface); border-radius: var(--radius); padding: 24px;
+    border: 1.5px solid var(--border); box-shadow: var(--shadow); margin-bottom: 20px;
+  }
+  .chart-title { font-weight: 700; font-size: 1rem; margin-bottom: 16px; }
+  .bar-chart { display: flex; flex-direction: column; gap: 12px; }
+  .bar-item { display: flex; flex-direction: column; gap: 4px; }
+  .bar-label-row { display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--text-muted); }
+  .bar-track { height: 10px; background: var(--surface2); border-radius: 999px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 999px; transition: width 1s cubic-bezier(.4,0,.2,1); }
+
+  .emoji-stats { display: flex; gap: 12px; flex-wrap: wrap; }
+  .em-stat { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; min-width: 70px; }
+  .em-stat .em { font-size: 2rem; }
+  .em-stat .em-pct { font-size: 0.9rem; font-weight: 700; color: var(--primary); }
+  .em-stat .em-label { font-size: 0.7rem; color: var(--text-muted); }
+
+  /* ── ADMIN ── */
+  #page-admin { display: none; padding: 100px 20px 40px; }
+  #page-admin.active { display: block; }
+  .admin-wrap { max-width: 900px; margin: 0 auto; }
+
+  .admin-login {
+    max-width: 400px; margin: 0 auto;
+    background: var(--surface); border-radius: var(--radius);
+    padding: 40px; border: 1.5px solid var(--border); box-shadow: var(--shadow);
+    text-align: center;
+  }
+  .admin-login h2 { font-family: 'Fraunces', serif; font-size: 1.8rem; margin-bottom: 8px; }
+  .admin-login p { color: var(--text-muted); margin-bottom: 24px; font-size: 0.9rem; }
+  .inp {
+    width: 100%; padding: 12px 16px; border-radius: var(--radius-sm);
+    border: 2px solid var(--border); background: var(--surface2);
+    color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.95rem; outline: none; margin-bottom: 12px;
+    transition: border 0.2s;
+  }
+  .inp:focus { border-color: var(--primary); }
+  .btn-login {
+    width: 100%; padding: 13px; border-radius: 999px;
+    background: var(--primary); color: #fff; border: none;
+    font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-login:hover { background: var(--accent); }
+
+  .admin-panel { display: none; }
+  .admin-tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+  .tab-btn {
+    padding: 8px 18px; border-radius: 999px; border: 2px solid var(--border);
+    background: var(--surface); color: var(--text-muted); font-weight: 600;
+    font-size: 0.85rem; cursor: pointer; transition: all 0.2s;
+  }
+  .tab-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+  .admin-tab { display: none; }
+  .admin-tab.active { display: block; }
+
+  .q-editor-list { display: flex; flex-direction: column; gap: 12px; }
+  .q-editor-item {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm); padding: 16px 20px;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .q-editor-num { font-weight: 800; color: var(--primary); font-size: 1.1rem; min-width: 28px; }
+  .q-editor-content { flex: 1; }
+  .q-editor-q { font-weight: 600; margin-bottom: 4px; }
+  .q-editor-type { font-size: 0.75rem; color: var(--text-muted); }
+  .btn-edit-q {
+    padding: 6px 14px; border-radius: 999px; border: 1.5px solid var(--border);
+    background: transparent; color: var(--text-muted); font-size: 0.8rem;
+    cursor: pointer; white-space: nowrap; transition: all 0.2s;
+  }
+  .btn-edit-q:hover { border-color: var(--primary); color: var(--primary); }
+
+  .response-table { width: 100%; border-collapse: collapse; }
+  .response-table th, .response-table td {
+    padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border);
+    font-size: 0.85rem;
+  }
+  .response-table th { font-weight: 700; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; }
+  .response-table tr:hover td { background: var(--surface2); }
+
+  .btn-download {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--green); color: #fff; border: none; border-radius: 999px;
+    padding: 10px 22px; font-weight: 700; font-size: 0.9rem; cursor: pointer;
+    transition: all 0.2s; margin-bottom: 16px;
+  }
+  .btn-download:hover { opacity: 0.85; transform: translateY(-1px); }
+
+  .tema-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+  .tema-card {
+    background: var(--surface); border: 2px solid var(--border);
+    border-radius: var(--radius-sm); padding: 16px; cursor: pointer; transition: all 0.2s;
+  }
+  .tema-card:hover { border-color: var(--primary); }
+  .tema-card.active-tema { border-color: var(--primary); background: var(--primary-soft); }
+  .tema-icon { font-size: 1.5rem; margin-bottom: 6px; }
+  .tema-name { font-weight: 700; font-size: 0.9rem; }
+  .tema-desc { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+  .btn-add-tema {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--primary-soft); color: var(--primary); border: 2px dashed var(--primary);
+    border-radius: var(--radius-sm); padding: 16px; cursor: pointer;
+    font-weight: 700; font-size: 0.9rem; width: 100%; transition: all 0.2s;
+  }
+  .btn-add-tema:hover { background: var(--primary); color: #fff; }
+
+  /* Edit modal */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+    z-index: 2000; align-items: center; justify-content: center; padding: 20px;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface); border-radius: var(--radius); padding: 32px;
+    max-width: 500px; width: 100%; box-shadow: 0 24px 64px rgba(0,0,0,0.2);
+    animation: popIn 0.25s ease;
+  }
+  .modal h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 16px; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 16px; }
+  .btn-save {
+    flex: 1; padding: 11px; border-radius: 999px; background: var(--primary);
+    color: #fff; border: none; font-weight: 700; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-save:hover { background: var(--accent); }
+  .btn-cancel {
+    padding: 11px 20px; border-radius: 999px; border: 2px solid var(--border);
+    background: transparent; color: var(--text-muted); cursor: pointer; font-weight: 600; transition: all 0.2s;
+  }
+  .btn-cancel:hover { border-color: var(--primary); color: var(--primary); }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: var(--text); color: var(--bg);
+    padding: 12px 24px; border-radius: 999px; font-weight: 600; font-size: 0.9rem;
+    z-index: 3000; transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    nav { padding: 8px 14px; gap: 10px; }
+    .nav-links a { padding: 4px 10px; font-size: 0.75rem; }
+    .q-card { padding: 24px 20px; }
+    .q-text { font-size: 1.2rem; }
+    .emoji-btn { min-width: 55px; padding: 10px 10px; }
+    .hero-sub { font-size: 0.95rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Speak<span>Up</span> 🎙️</div>
+  <div class="nav-links">
+    <a onclick="showPage('landing')" class="active" id="nav-landing">Beranda</a>
+    <a onclick="showPage('hasil')" id="nav-hasil">Hasil</a>
+    <a onclick="showPage('admin')" id="nav-admin">Admin</a>
+  </div>
+  <button class="dark-toggle" onclick="toggleDark()" title="Toggle dark mode">🌙</button>
+</nav>
+
+<!-- ── LANDING ── -->
+<div class="page active" id="page-landing">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+  <div class="badge">📅 Evaluasi Bulanan</div>
+  <h1 class="hero-title">Apa kabar<br><span class="highlight">sekolah bulan ini?</span></h1>
+  <p class="hero-sub">Cerita jujur kamu bikin sekolah jadi lebih baik. Nggak ada yang tau siapa kamu kok! 💬</p>
+  <div class="anon-badge">🔒 100% Anonim · Tanpa nama · Tanpa login</div>
+  <div style="margin-bottom: 28px; text-align:center;">
+    <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:10px;font-weight:600;">Kamu kelas berapa? <span style="opacity:0.5">(opsional)</span></p>
+    <div class="class-select-wrap" id="class-select">
+      <div class="class-chip" onclick="selectClass(this,'X')">Kelas X</div>
+      <div class="class-chip" onclick="selectClass(this,'XI')">Kelas XI</div>
+      <div class="class-chip" onclick="selectClass(this,'XII')">Kelas XII</div>
+      <div class="class-chip" onclick="selectClass(this,'skip')">Lewat aja 😅</div>
+    </div>
+  </div>
+  <button class="btn-start" onclick="startQuiz()">
+    Mulai Isi <span>→</span>
+  </button>
+  <div class="landing-cards">
+    <div class="l-card"><div class="l-card-icon">📝</div><div class="l-card-num" id="total-resp">47</div><div class="l-card-label">Respon bulan ini</div></div>
+    <div class="l-card"><div class="l-card-icon">⏱️</div><div class="l-card-num">~10</div><div class="l-card-label">Menit ngisi</div></div>
+    <div class="l-card"><div class="l-card-icon">🔒</div><div class="l-card-num">100%</div><div class="l-card-label">Anonim</div></div>
+  </div>
+</div>
+
+<!-- ── QUIZ ── -->
+<div class="page" id="page-quiz">
+  <div class="quiz-container">
+    <div class="progress-wrap">
+      <div class="progress-top">
+        <span class="progress-label" id="progress-cat">📚 Pembelajaran</span>
+        <span class="progress-pct" id="progress-pct">0%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+    <div class="q-card" id="q-card">
+      <!-- Filled by JS -->
+    </div>
+    <div class="q-nav">
+      <button class="btn-back" id="btn-back" onclick="prevQ()">← Kembali</button>
+      <button class="btn-next" id="btn-next" onclick="nextQ()">Lanjut →</button>
+      <button class="btn-skip" onclick="skipQ()">Lewati</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── DONE ── -->
+<div class="page" id="page-done">
+  <div class="done-wrap">
+    <span class="done-emoji">🎉</span>
+    <h2 class="done-title">Makasih udah jujur!</h2>
+    <p style="color:var(--text-muted);margin-bottom:4px;">Suara kamu udah kami terima. Beneran anonim, janji!</p>
+    <div class="done-quote" id="done-quote">
+      "Kritik yang jujur lebih berharga dari pujian yang basa-basi."
+    </div>
+    <button class="btn-home" onclick="showPage('landing')">🏠 Balik ke Beranda</button>
+    <button class="btn-home" onclick="showPage('hasil')" style="margin-left:10px;background:var(--accent);">📊 Lihat Hasil</button>
+  </div>
+</div>
+
+<!-- ── HASIL ── -->
+<div class="page" id="page-hasil">
+  <div class="hasil-wrap">
+    <h1 class="page-title">📊 Hasil Bulan Lalu</h1>
+    <p class="page-sub">Rekapan suara siswa — transparan dan jujur.</p>
+
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon">📝</div><div class="stat-num" id="hasil-total">0</div><div class="stat-label">Total Respon</div></div>
+      <div class="stat-card"><div class="stat-icon">😴</div><div class="stat-num" id="hasil-capek">—</div><div class="stat-label">Tingkat Kelelahan</div></div>
+      <div class="stat-card"><div class="stat-icon">📚</div><div class="stat-num" id="hasil-guru">—</div><div class="stat-label">Kejelasan Materi</div></div>
+      <div class="stat-card"><div class="stat-icon">🏫</div><div class="stat-num" id="hasil-fasilitas">—</div><div class="stat-label">Kepuasan Fasilitas</div></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">😊 Gimana perasaan bulan ini?</div>
+      <div class="emoji-stats">
+        <div class="em-stat"><span class="em">😭</span><span class="em-pct" id="ep-0">0%</span><span class="em-label">Berat banget</span></div>
+        <div class="em-stat"><span class="em">😔</span><span class="em-pct" id="ep-1">0%</span><span class="em-label">Lumayan berat</span></div>
+        <div class="em-stat"><span class="em">😐</span><span class="em-pct" id="ep-2">0%</span><span class="em-label">Biasa aja</span></div>
+        <div class="em-stat"><span class="em">😊</span><span class="em-pct" id="ep-3">0%</span><span class="em-label">Oke sih</span></div>
+        <div class="em-stat"><span class="em">🤩</span><span class="em-pct" id="ep-4">0%</span><span class="em-label">Luar biasa!</span></div>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">📚 Evaluasi Guru & Pembelajaran</div>
+      <div class="bar-chart" id="bar-chart-guru"></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">🏫 Fasilitas & Kenyamanan</div>
+      <div class="bar-chart" id="bar-chart-fasilitas"></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">💬 Masukan Terbanyak dari Siswa</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;" id="keyword-cloud"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── ADMIN ── -->
+<div class="page" id="page-admin">
+  <div class="admin-wrap">
+    <div id="admin-login-form" class="admin-login">
+      <div style="font-size:3rem;margin-bottom:8px;">🔐</div>
+      <h2>Admin Panel</h2>
+      <p>Masuk untuk kelola SpeakUp</p>
+      <input class="inp" type="text" placeholder="Username" id="admin-user">
+      <input class="inp" type="password" placeholder="Password" id="admin-pass">
+      <button class="btn-login" onclick="adminLogin()">Masuk</button>
+      <p style="font-size:0.75rem;color:var(--text-muted);margin-top:12px;">Demo: admin / speakup123</p>
+    </div>
+
+    <div id="admin-panel" class="admin-panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h1 class="page-title">⚙️ Admin Panel</h1>
+          <p class="page-sub">Kelola SpeakUp dengan mudah</p>
+        </div>
+        <button onclick="adminLogout()" style="padding:8px 18px;border-radius:999px;border:2px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;font-weight:600;">Keluar</button>
+      </div>
+
+      <div class="admin-tabs">
+        <button class="tab-btn active" onclick="switchTab('respon')">📋 Respon</button>
+        <button class="tab-btn" onclick="switchTab('pertanyaan')">✏️ Pertanyaan</button>
+        <button class="tab-btn" onclick="switchTab('tema')">🎨 Tema Bulanan</button>
+        <button class="tab-btn" onclick="switchTab('pengaturan')">⚙️ Pengaturan</button>
+      </div>
+
+      <!-- Respon Tab -->
+      <div class="admin-tab active" id="tab-respon">
+        <button class="btn-download" onclick="downloadCSV()">⬇️ Download CSV</button>
+        <div style="overflow-x:auto;">
+          <table class="response-table">
+            <thead>
+              <tr>
+                <th>#</th><th>Kelas</th><th>Kelelahan</th><th>Kejelasan Guru</th><th>Fasilitas</th><th>Waktu</th><th>Hapus</th>
+              </tr>
+            </thead>
+            <tbody id="response-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Pertanyaan Tab -->
+      <div class="admin-tab" id="tab-pertanyaan">
+        <div class="q-editor-list" id="q-editor-list"></div>
+      </div>
+
+      <!-- Tema Tab -->
+      <div class="admin-tab" id="tab-tema">
+        <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">Pilih tema bulan ini untuk menyesuaikan nuansa kuisioner.</p>
+        <div class="tema-grid" id="tema-grid"></div>
+      </div>
+
+      <!-- Pengaturan Tab -->
+      <div class="admin-tab" id="tab-pengaturan">
+        <div class="chart-card">
+          <div class="chart-title">🏷️ Nama Website</div>
+          <input class="inp" id="site-name-inp" value="SpeakUp" placeholder="Nama website">
+          <button class="btn-save" onclick="saveSiteName()" style="margin-top:8px;padding:10px 24px;border-radius:999px;width:auto;">Simpan</button>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">📅 Kelola Periode</div>
+          <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:14px;">Tambah periode sendiri, lalu tandai mana yang sedang aktif.</p>
+          <div style="display:flex;gap:8px;margin-bottom:16px;">
+            <input class="inp" id="period-new-inp" placeholder="cth: September 2025" style="margin-bottom:0;flex:1;">
+            <button class="btn-save" onclick="addPeriod()" style="padding:10px 18px;border-radius:999px;width:auto;white-space:nowrap;">+ Tambah</button>
+          </div>
+          <div id="period-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3>✏️ Edit Pertanyaan</h3>
+    <textarea class="inp q-textarea" id="modal-q" rows="3" placeholder="Teks pertanyaan..."></textarea>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Batal</button>
+      <button class="btn-save" onclick="saveModalQ()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── DATA ──
+let userClass = '';
+let currentQ = 0;
+let answers = {};
+let editingQIdx = -1;
+
+const questions = [
+  { id:0, cat:'😴 Kondisi Diri', catColor:'var(--orange)', catBg:'var(--orange-soft)', text:'Seberapa capek kamu bulan ini?', type:'slider', min:'Biasa aja', max:'Mati gaya 😵' },
+  { id:1, cat:'😊 Mood Bulan Ini', catColor:'var(--pink)', catBg:'var(--pink-soft)', text:'Gimana perasaan kamu secara keseluruhan bulan ini?', type:'emoji', options:[{em:'😭',label:'Berat banget'},{em:'😔',label:'Lumayan berat'},{em:'😐',label:'Biasa aja'},{em:'😊',label:'Oke sih'},{em:'🤩',label:'Luar biasa!'}] },
+  { id:2, cat:'📚 Guru & Pembelajaran', catColor:'var(--primary)', catBg:'var(--primary-soft)', text:'Guru udah menjelaskan materi dengan jelas bulan ini?', type:'slider', min:'Masih bingung', max:'Sangat jelas!' },
+  { id:3, cat:'📚 Guru & Pembelajaran', catColor:'var(--primary)', catBg:'var(--primary-soft)', text:'Gimana cara guru mengajar bulan ini?', type:'mc', options:[{em:'🚀',label:'Seru dan menarik!'},{em:'😌',label:'Cukup oke'},{em:'😑',label:'Monoton banget'},{em:'🥱',label:'Bikin ngantuk'}] },
+  { id:4, cat:'📝 Tugas & Ulangan', catColor:'var(--accent)', catBg:'var(--accent-soft)', text:'Tugas bulan ini terlalu numpuk?', type:'slider', min:'Santai banget', max:'Numpuk banget!' },
+  { id:5, cat:'📝 Tugas & Ulangan', catColor:'var(--accent)', catBg:'var(--accent-soft)', text:'Tingkat kesulitan ulangan/kuis bulan ini?', type:'mc', options:[{em:'😎',label:'Gampang banget'},{em:'🤔',label:'Pas, bisa dikerjain'},{em:'😰',label:'Agak susah'},{em:'💀',label:'Mati nggak bisa'}] },
+  { id:6, cat:'🏫 Fasilitas Sekolah', catColor:'var(--green)', catBg:'var(--green-soft)', text:'Gimana kondisi fasilitas sekolah bulan ini?', type:'slider', min:'Parah banget', max:'Mantap!' },
+  { id:7, cat:'🏫 Fasilitas Sekolah', catColor:'var(--green)', catBg:'var(--green-soft)', text:'Fasilitas mana yang paling perlu diperbaiki?', type:'mc', options:[{em:'🚽',label:'Toilet'},{em:'📶',label:'WiFi'},{em:'🪑',label:'Kelas & AC'},{em:'📚',label:'Perpustakaan'}] },
+  { id:8, cat:'👫 Hubungan Sosial', catColor:'var(--pink)', catBg:'var(--pink-soft)', text:'Gimana hubungan kamu dengan teman-teman bulan ini?', type:'emoji', options:[{em:'😤',label:'Ada konflik'},{em:'😕',label:'Kurang akur'},{em:'😐',label:'Biasa aja'},{em:'😊',label:'Baik-baik'},{em:'🥰',label:'Super hangat!'}] },
+  { id:9, cat:'🎉 Kegiatan Sekolah', catColor:'var(--orange)', catBg:'var(--orange-soft)', text:'Kegiatan sekolah bulan ini bermanfaat buat kamu?', type:'slider', min:'Nggak ada manfaatnya', max:'Sangat bermanfaat!' },
+  { id:10, cat:'🧠 Kesehatan Mental', catColor:'var(--primary)', catBg:'var(--primary-soft)', text:'Seberapa nyaman kamu belajar di sekolah bulan ini?', type:'slider', min:'Nggak nyaman', max:'Nyaman banget' },
+  { id:11, cat:'🧠 Kesehatan Mental', catColor:'var(--primary)', catBg:'var(--primary-soft)', text:'Tekanan akademik bulan ini terasa?', type:'mc', options:[{em:'😌',label:'Santai aja'},{em:'🙂',label:'Cukup manageable'},{em:'😬',label:'Lumayan berat'},{em:'🤯',label:'Overwhelming!'}] },
+  { id:12, cat:'🔥 Hal Ngeselin', catColor:'var(--orange)', catBg:'var(--orange-soft)', text:'Apa hal paling ngeselin bulan ini di sekolah?', type:'text', placeholder:'Curhatin aja di sini, aman kok! 😤' },
+  { id:13, cat:'💡 Saran & Kritik', catColor:'var(--green)', catBg:'var(--green-soft)', text:'Apa yang perlu diperbaiki sekolah bulan ini?', type:'text', placeholder:'Saran kamu sangat berarti! ✨' },
+  { id:14, cat:'💌 Pesan Bebas', catColor:'var(--pink)', catBg:'var(--pink-soft)', text:'Ada lagi yang mau kamu sampaikan? (bebas aja!)', type:'text', placeholder:'Anything goes — cerita, keluhan, atau bahkan apresiasi! 💬' },
+];
+
+const motivasiQuotes = [
+  '"Kritik yang jujur lebih berharga dari pujian yang basa-basi."',
+  '"Suaramu hari ini adalah perubahan sekolah esok hari. 🌟"',
+  '"Nggak ada yang lebih kuat dari anak muda yang berani jujur. 💪"',
+  '"Terima kasih udah peduli. Itu tanda kamu siswa yang luar biasa! 🙏"',
+  '"Setiap masukan kamu, sekecil apapun, berarti besar bagi kami. ❤️"',
+];
+
+const temas = [
+  { icon:'🌸', name:'Musim Semi', desc:'Segar, pastel, dan penuh harapan', active: false },
+  { icon:'☀️', name:'Semester Baru', desc:'Semangat, energik, dan optimis', active: true },
+  { icon:'📚', name:'Ujian Season', desc:'Serius tapi tetap santai', active: false },
+  { icon:'🎉', name:'Akhir Tahun', desc:'Meriah dan penuh kenangan', active: false },
+  { icon:'🌧️', name:'Mid Semester', desc:'Tetap semangat di tengah jalan', active: false },
+  { icon:'🏕️', name:'Study Camp', desc:'Fokus, produktif, dan kolaboratif', active: false },
+  { icon:'🌙', name:'Malam Belajar', desc:'Tenang, kalem, dan reflektif', active: false },
+  { icon:'🎭', name:'Pekan Budaya', desc:'Kreatif, ekspresif, dan meriah', active: false },
+  { icon:'💪', name:'Bulan Motivasi', desc:'Bangkit, semangat, dan pantang menyerah', active: false },
+];
+
+const sampleResponses = [];
+
+const guruBars = [
+  { label:'Kejelasan penjelasan', pct:0, color:'linear-gradient(90deg,#6366f1,#06b6d4)' },
+  { label:'Interaktif saat mengajar', pct:0, color:'linear-gradient(90deg,#f472b6,#6366f1)' },
+  { label:'Tepat waktu masuk kelas', pct:0, color:'linear-gradient(90deg,#34d399,#06b6d4)' },
+  { label:'Feedback tugas', pct:0, color:'linear-gradient(90deg,#fb923c,#f472b6)' },
+];
+
+const fasilitasBars = [
+  { label:'Kondisi toilet', pct:0, color:'linear-gradient(90deg,#fb923c,#f472b6)' },
+  { label:'WiFi/internet', pct:0, color:'linear-gradient(90deg,#f472b6,#6366f1)' },
+  { label:'AC/ventilasi kelas', pct:0, color:'linear-gradient(90deg,#6366f1,#06b6d4)' },
+  { label:'Kantin & makanan', pct:0, color:'linear-gradient(90deg,#34d399,#06b6d4)' },
+];
+
+const keywords = [];
+
+// ── INIT ──
+window.onload = () => {
+  renderBarChart('bar-chart-guru', guruBars);
+  renderBarChart('bar-chart-fasilitas', fasilitasBars);
+  renderKeywords([]);
+  renderResponseTable();
+  renderQEditor();
+  renderTemas();
+  renderPeriodList();
+  updateHasilStats();
+};
+
+// ── NAV ──
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  document.getElementById('nav-' + (id === 'done' ? 'landing' : id))?.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function toggleDark() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.querySelector('.dark-toggle').textContent = isDark ? '🌙' : '☀️';
+}
+
+// ── LANDING ──
+function selectClass(el, cls) {
+  document.querySelectorAll('.class-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  userClass = cls === 'skip' ? '' : cls;
+}
+
+function startQuiz() {
+  currentQ = 0;
+  answers = {};
+  showPage('quiz');
+  renderQ();
+}
+
+// ── QUIZ ──
+function renderQ() {
+  const q = questions[currentQ];
+  const pct = Math.round((currentQ / questions.length) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-pct').textContent = pct + '%';
+  document.getElementById('progress-cat').textContent = q.cat;
+  document.getElementById('btn-back').style.display = currentQ === 0 ? 'none' : '';
+
+  let html = `<div class="q-category" style="color:${q.catColor};background:${q.catBg}">${q.cat}</div>`;
+  html += `<div class="q-text">${q.text}</div>`;
+
+  if (q.type === 'emoji') {
+    html += `<div class="emoji-grid">`;
+    q.options.forEach((o, i) => {
+      const sel = answers[q.id] === i ? 'selected' : '';
+      html += `<button class="emoji-btn ${sel}" onclick="selectEmoji(${q.id},${i},this)"><span class="em">${o.em}</span>${o.label}</button>`;
+    });
+    html += `</div>`;
+  } else if (q.type === 'slider') {
+    const val = answers[q.id] !== undefined ? answers[q.id] : 5;
+    html += `<div class="slider-wrap">
+      <div class="slider-labels"><span>${q.min}</span><span>${q.max}</span></div>
+      <input type="range" min="1" max="10" value="${val}" id="slider-${q.id}"
+        oninput="answers[${q.id}]=+this.value;document.getElementById('sv-${q.id}').textContent=this.value+'/10'">
+      <div class="slider-value" id="sv-${q.id}">${val}/10</div>
+    </div>`;
+  } else if (q.type === 'mc') {
+    html += `<div class="mc-grid">`;
+    q.options.forEach((o, i) => {
+      const sel = answers[q.id] === i ? 'selected' : '';
+      html += `<button class="mc-btn ${sel}" onclick="selectMC(${q.id},${i},this)">
+        <span class="mc-icon">${o.em}</span>${o.label}
+        <span class="mc-check">${sel ? '✓' : ''}</span></button>`;
+    });
+    html += `</div>`;
+  } else if (q.type === 'text') {
+    const val = answers[q.id] || '';
+    html += `<textarea class="q-textarea" rows="4" placeholder="${q.placeholder}"
+      oninput="answers[${q.id}]=this.value" id="ta-${q.id}">${val}</textarea>`;
+  }
+
+  const card = document.getElementById('q-card');
+  card.style.animation = 'none';
+  card.offsetHeight;
+  card.style.animation = '';
+  card.innerHTML = html;
+
+  document.getElementById('btn-next').textContent = currentQ === questions.length - 1 ? 'Submit ✨' : 'Lanjut →';
+}
+
+function selectEmoji(qId, idx, el) {
+  answers[qId] = idx;
+  document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function selectMC(qId, idx, el) {
+  answers[qId] = idx;
+  document.querySelectorAll('.mc-btn').forEach(b => { b.classList.remove('selected'); b.querySelector('.mc-check').textContent = ''; });
+  el.classList.add('selected');
+  el.querySelector('.mc-check').textContent = '✓';
+}
+
+function nextQ() {
+  const q = questions[currentQ];
+  if (q.type === 'slider' && answers[q.id] === undefined) {
+    answers[q.id] = 5;
+  }
+  if (currentQ < questions.length - 1) {
+    currentQ++;
+    renderQ();
+  } else {
+    submitQuiz();
+  }
+}
+
+function prevQ() {
+  if (currentQ > 0) { currentQ--; renderQ(); }
+}
+
+function skipQ() {
+  if (currentQ < questions.length - 1) { currentQ++; renderQ(); }
+  else submitQuiz();
+}
+
+function submitQuiz() {
+  sampleResponses.unshift({ kelas: userClass || '—', capek: answers[0]||5, guru: answers[2]||5, fasilitas: answers[6]||5, mood: answers[1], waktu: 'Baru saja' });
+  const qIdx = Math.floor(Math.random() * motivasiQuotes.length);
+  document.getElementById('done-quote').textContent = motivasiQuotes[qIdx];
+  renderResponseTable();
+  updateHasilStats();
+  showPage('done');
+}
+
+function updateHasilStats() {
+  const n = sampleResponses.length;
+  document.getElementById('total-resp').textContent = n;
+  const hasilTotal = document.getElementById('hasil-total');
+  if (hasilTotal) hasilTotal.textContent = n;
+
+  if (n === 0) {
+    ['hasil-capek','hasil-guru','hasil-fasilitas'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = '—'; });
+    [0,1,2,3,4].forEach(i => { const el = document.getElementById('ep-'+i); if(el) el.textContent = '0%'; });
+    return;
+  }
+
+  const avg = (key) => (sampleResponses.reduce((s,r) => s + (r[key]||5), 0) / n).toFixed(1);
+  const capekEl = document.getElementById('hasil-capek');
+  const guruEl = document.getElementById('hasil-guru');
+  const fasEl = document.getElementById('hasil-fasilitas');
+  if (capekEl) capekEl.textContent = avg('capek') + '/10';
+  if (guruEl) guruEl.textContent = avg('guru') + '/10';
+  if (fasEl) fasEl.textContent = avg('fasilitas') + '/10';
+
+  // Emoji mood stats
+  const moodCounts = [0,0,0,0,0];
+  sampleResponses.forEach(r => { if (r.mood !== undefined) moodCounts[r.mood]++; });
+  const moodTotal = moodCounts.reduce((a,b) => a+b, 0) || 1;
+  moodCounts.forEach((c, i) => {
+    const el = document.getElementById('ep-'+i);
+    if (el) el.textContent = Math.round(c/moodTotal*100) + '%';
+  });
+
+  // Keyword cloud dari jawaban text
+  const texts = sampleResponses.map(r => r.text12 || '').filter(Boolean);
+  renderKeywords(texts);
+}
+
+// ── HASIL ──
+function renderBarChart(id, data) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.innerHTML = data.map(d => `
+    <div class="bar-item">
+      <div class="bar-label-row"><span>${d.label}</span><span style="font-weight:700">${d.pct}%</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:0%;background:${d.color}" data-w="${d.pct}%"></div></div>
+    </div>
+  `).join('');
+  setTimeout(() => { el.querySelectorAll('.bar-fill').forEach(f => f.style.width = f.dataset.w); }, 100);
+}
+
+function renderKeywords(texts) {
+  const el = document.getElementById('keyword-cloud');
+  if (!el) return;
+  if (!texts || texts.length === 0) {
+    el.innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem;">Belum ada masukan teks dari siswa.</p>';
+    return;
+  }
+  const colors = ['var(--primary-soft)','var(--accent-soft)','var(--pink-soft)','var(--green-soft)','var(--orange-soft)'];
+  const textColors = ['var(--primary)','var(--accent)','var(--pink)','var(--green)','var(--orange)'];
+  el.innerHTML = texts.map((k, i) => {
+    const c = i % colors.length;
+    return `<span style="background:${colors[c]};color:${textColors[c]};padding:6px 14px;border-radius:999px;font-size:0.82rem;font-weight:600;">${k}</span>`;
+  }).join('');
+}
+
+// ── ADMIN ──
+function adminLogin() {
+  const u = document.getElementById('admin-user').value;
+  const p = document.getElementById('admin-pass').value;
+  if (u === 'admin' && p === 'speakup123') {
+    document.getElementById('admin-login-form').style.display = 'none';
+    document.getElementById('admin-panel').style.display = 'block';
+    showToast('✅ Selamat datang, Admin!');
+  } else {
+    showToast('❌ Username/password salah!');
+  }
+}
+
+function adminLogout() {
+  document.getElementById('admin-login-form').style.display = '';
+  document.getElementById('admin-panel').style.display = 'none';
+  document.getElementById('admin-user').value = '';
+  document.getElementById('admin-pass').value = '';
+}
+
+function switchTab(t) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.admin-tab').forEach(tab => tab.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('tab-' + t).classList.add('active');
+}
+
+function renderResponseTable() {
+  const tbody = document.getElementById('response-tbody');
+  if (!tbody) return;
+  if (sampleResponses.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:32px;font-size:0.9rem;">📭 Belum ada respon. Bagikan link ke siswa!</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = sampleResponses.map((r, i) => `
+    <tr>
+      <td style="font-weight:700;color:var(--primary)">#${i+1}</td>
+      <td><span style="background:var(--primary-soft);color:var(--primary);padding:3px 10px;border-radius:999px;font-size:0.78rem;font-weight:600">${r.kelas || '—'}</span></td>
+      <td>${r.capek}/10</td><td>${r.guru}/10</td><td>${r.fasilitas}/10</td>
+      <td style="color:var(--text-muted)">${r.waktu}</td>
+      <td><button onclick="deleteResponse(${i})" title="Hapus" style="background:none;border:none;cursor:pointer;font-size:1rem;padding:4px 8px;border-radius:8px;transition:all 0.2s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='none'">🗑️</button></td>
+    </tr>
+  `).join('');
+}
+
+function deleteResponse(idx) {
+  sampleResponses.splice(idx, 1);
+  renderResponseTable();
+  updateHasilStats();
+  showToast('🗑️ Respon dihapus.');
+}
+
+function renderQEditor() {
+  const el = document.getElementById('q-editor-list');
+  if (!el) return;
+  el.innerHTML = questions.map((q, i) => `
+    <div class="q-editor-item">
+      <div class="q-editor-num">${i+1}</div>
+      <div class="q-editor-content">
+        <div class="q-editor-q" id="qe-${i}">${q.text}</div>
+        <div class="q-editor-type">${q.cat} · ${q.type}</div>
+      </div>
+      <button class="btn-edit-q" onclick="openModal(${i})">✏️ Edit</button>
+    </div>
+  `).join('');
+}
+
+function openModal(idx) {
+  editingQIdx = idx;
+  document.getElementById('modal-q').value = questions[idx].text;
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+
+function saveModalQ() {
+  if (editingQIdx < 0) return;
+  const newText = document.getElementById('modal-q').value.trim();
+  if (!newText) return;
+  questions[editingQIdx].text = newText;
+  document.getElementById(`qe-${editingQIdx}`).textContent = newText;
+  closeModal();
+  showToast('✅ Pertanyaan diperbarui!');
+}
+
+function renderTemas() {
+  const el = document.getElementById('tema-grid');
+  if (!el) return;
+  el.innerHTML = temas.map((t, i) => `
+    <div class="tema-card ${t.active ? 'active-tema' : ''}" onclick="selectTema(${i})">
+      <div class="tema-icon">${t.icon}</div>
+      <div class="tema-name">${t.name}</div>
+      <div class="tema-desc">${t.desc}</div>
+      ${t.active ? '<div style="margin-top:8px;font-size:0.72rem;font-weight:700;color:var(--primary);">✓ Aktif</div>' : ''}
+    </div>
+  `).join('');
+}
+
+function selectTema(idx) {
+  temas.forEach((t, i) => t.active = i === idx);
+  renderTemas();
+  showToast(`✅ Tema "${temas[idx].name}" diaktifkan!`);
+}
+
+// ── PERIOD MANAGER ──
+let periods = [
+  { name: 'Juni 2025', active: false },
+  { name: 'Juli 2025', active: false },
+  { name: 'Agustus 2025', active: true },
+];
+
+function renderPeriodList() {
+  const el = document.getElementById('period-list');
+  if (!el) return;
+  if (periods.length === 0) {
+    el.innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem;text-align:center;padding:16px 0;">Belum ada periode. Tambah dulu!</p>';
+    return;
+  }
+  el.innerHTML = periods.map((p, i) => `
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:var(--radius-sm);border:2px solid ${p.active ? 'var(--primary)' : 'var(--border)'};background:${p.active ? 'var(--primary-soft)' : 'var(--surface2)'};transition:all 0.2s;">
+      <span style="flex:1;font-weight:${p.active ? '700' : '500'};color:${p.active ? 'var(--primary)' : 'var(--text)'};">${p.name}</span>
+      ${p.active ? '<span style="font-size:0.72rem;font-weight:700;color:var(--primary);background:var(--surface);padding:3px 10px;border-radius:999px;">✓ Aktif</span>' : `<button onclick="setActivePeriod(${i})" style="font-size:0.78rem;padding:5px 12px;border-radius:999px;border:1.5px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;font-weight:600;" onmouseover="this.style.borderColor='var(--primary)';this.style.color='var(--primary)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">Jadikan Aktif</button>`}
+      <button onclick="deletePeriod(${i})" style="font-size:0.85rem;padding:5px 10px;border-radius:999px;border:none;background:transparent;color:var(--text-muted);cursor:pointer;" title="Hapus" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='var(--text-muted)'">🗑️</button>
+    </div>
+  `).join('');
+}
+
+function addPeriod() {
+  const inp = document.getElementById('period-new-inp');
+  const name = inp.value.trim();
+  if (!name) { showToast('⚠️ Isi nama periode dulu!'); return; }
+  if (periods.find(p => p.name.toLowerCase() === name.toLowerCase())) { showToast('⚠️ Periode sudah ada!'); return; }
+  periods.push({ name, active: false });
+  inp.value = '';
+  renderPeriodList();
+  showToast(`✅ Periode "${name}" ditambahkan!`);
+}
+
+function setActivePeriod(idx) {
+  periods.forEach((p, i) => p.active = i === idx);
+  renderPeriodList();
+  showToast(`✅ "${periods[idx].name}" sekarang aktif!`);
+}
+
+function deletePeriod(idx) {
+  const name = periods[idx].name;
+  periods.splice(idx, 1);
+  renderPeriodList();
+  showToast(`🗑️ "${name}" dihapus.`);
+}
+
+function saveSiteName() {
+  const name = document.getElementById('site-name-inp').value.trim();
+  if (name) {
+    document.querySelector('.nav-logo').innerHTML = name + ' 🎙️';
+    showToast('✅ Nama website diperbarui!');
+  }
+}
+
+function downloadCSV() {
+  const headers = ['No','Kelas','Kelelahan','Kejelasan Guru','Fasilitas','Waktu'];
+  const rows = sampleResponses.map((r, i) => [i+1, r.kelas||'—', r.capek, r.guru, r.fasilitas, r.waktu]);
+  const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'speakup-respon.csv';
+  a.click();
+  showToast('⬇️ CSV berhasil diunduh!');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// Close modal on overlay click
+document.getElementById('modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+</script>
+</body>
+</html>
