@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SpeakUp 🎙️ – Suara Siswa</title>
+<title>SafeSay 🎙️ – Suara Siswa</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fraunces:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <style>
@@ -489,7 +489,7 @@
 
 <!-- NAV -->
 <nav>
-  <div class="nav-logo">Speak<span>Up</span> 🎙️</div>
+  <div class="nav-logo">Safe<span>Say</span> 🎙️</div>
   <div class="nav-links">
     <a onclick="showPage('landing')" class="active" id="nav-landing">Beranda</a>
     <a onclick="showPage('hasil')" id="nav-hasil">Hasil</a>
@@ -619,7 +619,7 @@
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
         <div>
           <h1 class="page-title">⚙️ Admin Panel</h1>
-          <p class="page-sub">Kelola SpeakUp dengan mudah</p>
+          <p class="page-sub">Kelola SafeSay dengan mudah</p>
         </div>
         <button onclick="adminLogout()" style="padding:8px 18px;border-radius:999px;border:2px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;font-weight:600;">Keluar</button>
       </div>
@@ -638,7 +638,7 @@
           <table class="response-table">
             <thead>
               <tr>
-                <th>#</th><th>Kelas</th><th>Kelelahan</th><th>Kejelasan Guru</th><th>Fasilitas</th><th>Waktu</th><th>Hapus</th>
+                <th>#</th><th>Kelas</th><th>Kelelahan</th><th>Kejelasan Guru</th><th>Fasilitas</th><th>Periode</th><th>Waktu</th><th>Hapus</th>
               </tr>
             </thead>
             <tbody id="response-tbody"></tbody>
@@ -661,7 +661,7 @@
       <div class="admin-tab" id="tab-pengaturan">
         <div class="chart-card">
           <div class="chart-title">🏷️ Nama Website</div>
-          <input class="inp" id="site-name-inp" value="SpeakUp" placeholder="Nama website">
+          <input class="inp" id="site-name-inp" value="SafeSay" placeholder="Nama website">
           <button class="btn-save" onclick="saveSiteName()" style="margin-top:8px;padding:10px 24px;border-radius:999px;width:auto;">Simpan</button>
         </div>
         <div class="chart-card">
@@ -694,11 +694,25 @@
 <div class="toast" id="toast"></div>
 
 <script>
+// ── LOCALSTORAGE HELPERS ──
+function lsGet(key, fallback) {
+  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; } catch { return fallback; }
+}
+function lsSet(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} }
+
 // ── DATA ──
 let userClass = '';
 let currentQ = 0;
 let answers = {};
 let editingQIdx = -1;
+
+// Load persisted responses & periods
+let sampleResponses = lsGet('safesay_responses', []);
+let periods = lsGet('safesay_periods', [
+  { name: 'Juni 2025', active: false },
+  { name: 'Juli 2025', active: false },
+  { name: 'Agustus 2025', active: true },
+]);
 
 const questions = [
   { id:0, cat:'😴 Kondisi Diri', catColor:'var(--orange)', catBg:'var(--orange-soft)', text:'Seberapa capek kamu bulan ini?', type:'slider', min:'Biasa aja', max:'Mati gaya 😵' },
@@ -738,8 +752,6 @@ const temas = [
   { icon:'💪', name:'Bulan Motivasi', desc:'Bangkit, semangat, dan pantang menyerah', active: false },
 ];
 
-const sampleResponses = [];
-
 const guruBars = [
   { label:'Kejelasan penjelasan', pct:0, color:'linear-gradient(90deg,#6366f1,#06b6d4)' },
   { label:'Interaktif saat mengajar', pct:0, color:'linear-gradient(90deg,#f472b6,#6366f1)' },
@@ -766,6 +778,17 @@ window.onload = () => {
   renderTemas();
   renderPeriodList();
   updateHasilStats();
+
+  // Auto-login admin kalau udah pernah login
+  if (localStorage.getItem('safesay_admin') === 'true') {
+    showAdminPanel();
+  }
+
+  // Restore nama website kalau pernah diubah
+  const savedName = localStorage.getItem('safesay_sitename');
+  if (savedName) {
+    document.querySelector('.nav-logo').innerHTML = savedName + ' 🎙️';
+  }
 };
 
 // ── NAV ──
@@ -885,7 +908,18 @@ function skipQ() {
 }
 
 function submitQuiz() {
-  sampleResponses.unshift({ kelas: userClass || '—', capek: answers[0]||5, guru: answers[2]||5, fasilitas: answers[6]||5, mood: answers[1], waktu: 'Baru saja' });
+  const activePeriod = periods.find(p => p.active)?.name || '—';
+  sampleResponses.unshift({
+    kelas: userClass || '—',
+    capek: answers[0]||5,
+    guru: answers[2]||5,
+    fasilitas: answers[6]||5,
+    mood: answers[1],
+    text12: answers[12] || '',
+    periode: activePeriod,
+    waktu: new Date().toLocaleString('id-ID', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})
+  });
+  lsSet('safesay_responses', sampleResponses);
   const qIdx = Math.floor(Math.random() * motivasiQuotes.length);
   document.getElementById('done-quote').textContent = motivasiQuotes[qIdx];
   renderResponseTable();
@@ -960,19 +994,26 @@ function adminLogin() {
   const u = document.getElementById('admin-user').value;
   const p = document.getElementById('admin-pass').value;
   if (u === 'admin' && p === 'speakup123') {
-    document.getElementById('admin-login-form').style.display = 'none';
-    document.getElementById('admin-panel').style.display = 'block';
+    localStorage.setItem('safesay_admin', 'true');
+    showAdminPanel();
     showToast('✅ Selamat datang, Admin!');
   } else {
     showToast('❌ Username/password salah!');
   }
 }
 
+function showAdminPanel() {
+  document.getElementById('admin-login-form').style.display = 'none';
+  document.getElementById('admin-panel').style.display = 'block';
+}
+
 function adminLogout() {
+  localStorage.removeItem('safesay_admin');
   document.getElementById('admin-login-form').style.display = '';
   document.getElementById('admin-panel').style.display = 'none';
   document.getElementById('admin-user').value = '';
   document.getElementById('admin-pass').value = '';
+  showToast('👋 Berhasil keluar.');
 }
 
 function switchTab(t) {
@@ -985,23 +1026,28 @@ function switchTab(t) {
 function renderResponseTable() {
   const tbody = document.getElementById('response-tbody');
   if (!tbody) return;
-  if (sampleResponses.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:32px;font-size:0.9rem;">📭 Belum ada respon. Bagikan link ke siswa!</td></tr>`;
+  const activePeriod = periods.find(p => p.active)?.name || null;
+  const filtered = activePeriod ? sampleResponses.filter(r => r.periode === activePeriod) : sampleResponses;
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:32px;font-size:0.9rem;">📭 Belum ada respon${activePeriod ? ' untuk periode '+activePeriod : ''}. Bagikan link ke siswa!</td></tr>`;
     return;
   }
-  tbody.innerHTML = sampleResponses.map((r, i) => `
-    <tr>
+  tbody.innerHTML = filtered.map((r, i) => {
+    const realIdx = sampleResponses.indexOf(r);
+    return `<tr>
       <td style="font-weight:700;color:var(--primary)">#${i+1}</td>
       <td><span style="background:var(--primary-soft);color:var(--primary);padding:3px 10px;border-radius:999px;font-size:0.78rem;font-weight:600">${r.kelas || '—'}</span></td>
       <td>${r.capek}/10</td><td>${r.guru}/10</td><td>${r.fasilitas}/10</td>
-      <td style="color:var(--text-muted)">${r.waktu}</td>
-      <td><button onclick="deleteResponse(${i})" title="Hapus" style="background:none;border:none;cursor:pointer;font-size:1rem;padding:4px 8px;border-radius:8px;transition:all 0.2s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='none'">🗑️</button></td>
-    </tr>
-  `).join('');
+      <td><span style="background:var(--accent-soft);color:var(--accent);padding:3px 10px;border-radius:999px;font-size:0.75rem;font-weight:600">${r.periode||'—'}</span></td>
+      <td style="color:var(--text-muted);font-size:0.8rem">${r.waktu}</td>
+      <td><button onclick="deleteResponse(${realIdx})" title="Hapus" style="background:none;border:none;cursor:pointer;font-size:1rem;padding:4px 8px;border-radius:8px;transition:all 0.2s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='none'">🗑️</button></td>
+    </tr>`;
+  }).join('');
 }
 
 function deleteResponse(idx) {
   sampleResponses.splice(idx, 1);
+  lsSet('safesay_responses', sampleResponses);
   renderResponseTable();
   updateHasilStats();
   showToast('🗑️ Respon dihapus.');
@@ -1060,12 +1106,6 @@ function selectTema(idx) {
 }
 
 // ── PERIOD MANAGER ──
-let periods = [
-  { name: 'Juni 2025', active: false },
-  { name: 'Juli 2025', active: false },
-  { name: 'Agustus 2025', active: true },
-];
-
 function renderPeriodList() {
   const el = document.getElementById('period-list');
   if (!el) return;
@@ -1089,19 +1129,23 @@ function addPeriod() {
   if (periods.find(p => p.name.toLowerCase() === name.toLowerCase())) { showToast('⚠️ Periode sudah ada!'); return; }
   periods.push({ name, active: false });
   inp.value = '';
+  lsSet('safesay_periods', periods);
   renderPeriodList();
   showToast(`✅ Periode "${name}" ditambahkan!`);
 }
 
 function setActivePeriod(idx) {
   periods.forEach((p, i) => p.active = i === idx);
+  lsSet('safesay_periods', periods);
   renderPeriodList();
+  renderResponseTable();
   showToast(`✅ "${periods[idx].name}" sekarang aktif!`);
 }
 
 function deletePeriod(idx) {
   const name = periods[idx].name;
   periods.splice(idx, 1);
+  lsSet('safesay_periods', periods);
   renderPeriodList();
   showToast(`🗑️ "${name}" dihapus.`);
 }
@@ -1110,20 +1154,24 @@ function saveSiteName() {
   const name = document.getElementById('site-name-inp').value.trim();
   if (name) {
     document.querySelector('.nav-logo').innerHTML = name + ' 🎙️';
+    localStorage.setItem('safesay_sitename', name);
     showToast('✅ Nama website diperbarui!');
   }
 }
 
 function downloadCSV() {
-  const headers = ['No','Kelas','Kelelahan','Kejelasan Guru','Fasilitas','Waktu'];
-  const rows = sampleResponses.map((r, i) => [i+1, r.kelas||'—', r.capek, r.guru, r.fasilitas, r.waktu]);
-  const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
-  const blob = new Blob([csv], {type:'text/csv'});
+  const activePeriod = periods.find(p => p.active)?.name || null;
+  const filtered = activePeriod ? sampleResponses.filter(r => r.periode === activePeriod) : sampleResponses;
+  if (filtered.length === 0) { showToast('⚠️ Tidak ada data untuk diunduh!'); return; }
+  const headers = ['No','Kelas','Kelelahan','Kejelasan Guru','Fasilitas','Periode','Waktu'];
+  const rows = filtered.map((r, i) => [i+1, r.kelas||'—', r.capek, r.guru, r.fasilitas, r.periode||'—', r.waktu]);
+  const csv = [headers, ...rows].map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'speakup-respon.csv';
+  a.download = `safesay-${activePeriod || 'semua'}.csv`;
   a.click();
-  showToast('⬇️ CSV berhasil diunduh!');
+  showToast(`⬇️ Diunduh: ${filtered.length} respon (${activePeriod || 'semua periode'})`);
 }
 
 function showToast(msg) {
