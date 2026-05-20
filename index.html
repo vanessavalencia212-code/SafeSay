@@ -608,7 +608,7 @@
     <div id="admin-login-form" class="admin-login">
       <div style="font-size:3rem;margin-bottom:8px;">🔐</div>
       <h2>Admin Panel</h2>
-      <p>Masuk untuk kelola SpeakUp</p>
+      <p>Masuk untuk kelola SafeSay</p>
       <input class="inp" type="text" placeholder="Username" id="admin-user">
       <input class="inp" type="password" placeholder="Password" id="admin-pass">
       <button class="btn-login" onclick="adminLogin()">Masuk</button>
@@ -993,7 +993,7 @@ function renderKeywords(texts) {
 function adminLogin() {
   const u = document.getElementById('admin-user').value;
   const p = document.getElementById('admin-pass').value;
-  if (u === 'admin' && p === 'speakup123') {
+  if (u === 'admin' && p === 'safesay123') {
     localStorage.setItem('safesay_admin', 'true');
     showAdminPanel();
     showToast('✅ Selamat datang, Admin!');
