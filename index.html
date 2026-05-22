@@ -489,7 +489,7 @@
 
 <!-- NAV -->
 <nav>
-  <div class="nav-logo">Safe<span>Say</span> 🎙️</div>
+  <div class="nav-logo" id="nav-logo-tap" onclick="tapLogo()" style="cursor:pointer;user-select:none;">Safe<span>Say</span> 🎙️</div>
   <div class="nav-links">
     <a onclick="showPage('landing')" class="active" id="nav-landing">Beranda</a>
     <a onclick="showPage('hasil')" id="nav-hasil">Hasil</a>
@@ -814,14 +814,32 @@ function showPage(id) {
   window.scrollTo(0, 0);
 }
 
-// Secret admin access: ketik "safesay" di keyboard mana saja
+// Secret admin access: tap/klik logo 5x
+let tapCount = 0;
+let tapTimer = null;
+function tapLogo() {
+  tapCount++;
+  clearTimeout(tapTimer);
+  if (tapCount >= 5) {
+    tapCount = 0;
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-admin').classList.add('active');
+    window.scrollTo(0, 0);
+    showToast('🔑 Mode Admin dibuka!');
+    return;
+  }
+  // Kasih hint setelah tap ke-3
+  if (tapCount >= 3) showToast(`🔑 ${5 - tapCount}x lagi...`);
+  tapTimer = setTimeout(() => { tapCount = 0; }, 2000);
+}
+
+// Secret admin access: ketik "safesay" di keyboard (laptop)
 let secretBuffer = '';
 document.addEventListener('keydown', (e) => {
   secretBuffer += e.key.toLowerCase();
   if (secretBuffer.length > 7) secretBuffer = secretBuffer.slice(-7);
   if (secretBuffer === 'safesay') {
     secretBuffer = '';
-    document.getElementById('page-admin').classList.remove('active');
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById('page-admin').classList.add('active');
     window.scrollTo(0, 0);
